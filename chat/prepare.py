@@ -48,8 +48,7 @@ os.makedirs(args.output, exist_ok=True)
 def initialize_config(config):
     with open(config, "r", encoding="utf-8") as reader:
         text = reader.read()
-    kwargs = json.loads(text)
-    return kwargs
+    return json.loads(text)
 
 def initialize_loaders(kwargs):
     for k, v in kwargs.items():
@@ -64,8 +63,7 @@ def initialize_loaders(kwargs):
 
 def docslist_load_local(directory):
     ext = "*.pdf"
-    docslist = glob.glob(os.path.join(directory, ext), recursive=True)
-    return docslist
+    return glob.glob(os.path.join(directory, ext), recursive=True)
 
 def docslist_load_config(directory, loaders):
     docslist = []
@@ -86,8 +84,7 @@ def documents_load_config(doc_path, loaders):
 def documents_split(docs, encoder, chunk_size, chunk_overlap):
     #text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
     text_splitter =  TokenTextSplitter(encoding_name=encoder, chunk_size=chunk_size, chunk_overlap=chunk_overlap)
-    docs_split = text_splitter.split_documents(docs)
-    return docs_split
+    return text_splitter.split_documents(docs)
 
 def documents_save(docs_split, path, filename, fileformat, index_current):
     global cnt_save
@@ -118,8 +115,7 @@ def embedding_create(encoder, path, filename, fileformat):
     docs_split = pd.read_csv(loadpath, sep='\t', header=None)
     print("total number of split passages for embedding:", len(docs_split))
     embeddings = HuggingFaceEmbeddings(model_name=encoder, encode_kwargs={'normalize_embeddings': True})
-    embed_split = embeddings.embed_documents(docs_split[1])
-    return embed_split
+    return embeddings.embed_documents(docs_split[1])
 
 def embedding_save(embed_split, path, filename, fileformat):
     savepath = os.path.join(path, filename+fileformat)
@@ -149,7 +145,7 @@ def main():
     print(args)
 
     print("loading documents list...")
-    if args.config == None:
+    if args.config is None:
         docslist = docslist_load_local(args.input)
     else:
         print("use config file")
@@ -164,7 +160,7 @@ def main():
     print("loading, splitting and saving documents...")
     cnt_passage = 0
     cnt_split = 0
-    if args.config == None:
+    if args.config is None:
         for item in tqdm(docslist):
             docs = documents_load_local(item)
             docs_split = documents_split(docs, args.split_encoder, args.split_chunk_size, args.split_chunk_overlap)
@@ -193,7 +189,7 @@ def main():
         print("total number of indexes:", index_split.ntotal)
         print("saving index")
         index_save(index_split, args.output, args.out_index, args.out_indexext)
-        
+
     print("documents preparation completed")
 
 if __name__ == "__main__":
