@@ -46,8 +46,17 @@ if args.retriever:
 
 # Initialize Data Logging
 def initialize_logs():
-    df = pd.DataFrame(columns=['Sim_QKSL', 'Sim_RKSL', 'Sim_QKTL', 'Sim_RKTL', 'Query', 'Response', 'Prompt'])
-    return df
+    return pd.DataFrame(
+        columns=[
+            'Sim_QKSL',
+            'Sim_RKSL',
+            'Sim_QKTL',
+            'Sim_RKTL',
+            'Query',
+            'Response',
+            'Prompt',
+        ]
+    )
 df = initialize_logs()
 
 # Update Prompts Function
@@ -116,10 +125,10 @@ def main():
                 prompt = history[-1][0]
                 flag_retrieve = retriever[0]
                 mode = retriever[1]
-                if mode == None:
+                if mode is None:
                     mode = 0
                 idx = retriever[2]
-                if idx == None:
+                if idx is None:
                     idx = 0
                 flag_weight = retriever[3]
                 weight = retriever[4]
@@ -202,10 +211,10 @@ def main():
                 prompt = user_message
                 flag_retrieve = retriever[0]
                 mode = retriever[1]
-                if mode == None:
+                if mode is None:
                     mode = 0
                 idx = retriever[2]
-                if idx == None:
+                if idx is None:
                     idx = 0
                 flag_weight = retriever[3]
                 weight = retriever[4]

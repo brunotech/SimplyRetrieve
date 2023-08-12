@@ -30,47 +30,42 @@ def embedding_create(encoder, query):
     return embed_query
 
 def embedding_initialize(encoder):
-    embedder = CustomEmbeddings(model_name=encoder, encode_kwargs={'normalize_embeddings': True})
-    return embedder
+    return CustomEmbeddings(
+        model_name=encoder, encode_kwargs={'normalize_embeddings': True}
+    )
 
 def index_retrieve(index, embed_query, num_passage):
     d, i = index.search(embed_query, num_passage)
     return i
 
 def knowledge_load_local(path):
-    knowledge = pd.read_csv(path, sep='\t', header=None)
-    return knowledge
+    return pd.read_csv(path, sep='\t', header=None)
 
 def index_load_local(path, method):
     index = faiss.read_index(path)
     if "ivfpq" in method:
-        print('current nprobe: {}'.format(index.nprobe))
+        print(f'current nprobe: {index.nprobe}')
         index.nprobe = 256
-        print('changed to: {}'.format(index.nprobe))
+        print(f'changed to: {index.nprobe}')
         if "hnsw" in method:
             quantizer = faiss.downcast_index(index.quantizer)
-            print('current efSearch: {}'.format(quantizer.hnsw.efSearch))
+            print(f'current efSearch: {quantizer.hnsw.efSearch}')
             faiss.downcast_index(index.quantizer).hnsw.efSearch = 128
             quantizer = faiss.downcast_index(index.quantizer)
-            print('changed to: {}'.format(quantizer.hnsw.efSearch))
+            print(f'changed to: {quantizer.hnsw.efSearch}')
     elif "hnsw" in method:
-        print('current efSearch: {}'.format(index.hnsw.efSearch))
+        print(f'current efSearch: {index.hnsw.efSearch}')
         index.hnsw.efSearch = 128
-        print('changed to: {}'.format(index.hnsw.efSearch))
+        print(f'changed to: {index.hnsw.efSearch}')
     return index
 
 def retriever_mokb(embed_mode, embed_query):
     similarity = np.dot(embed_mode, np.transpose(embed_query)).squeeze()
     print("MoKB similarity scores:", similarity, "Selected KB:", np.argmax(similarity))
-    idx = np.argmax(similarity)
-    return idx
+    return np.argmax(similarity)
 
 def retriever_weighting(docs, weight):
-    if weight == 100:
-        return docs
-    else:
-        length = int(len(docs)*(weight/100))
-        return docs[:length]
+    return docs if weight == 100 else docs[:int(len(docs)*(weight/100))]
 
 def initialize_retriever(kwargs):
     print("enable retriever and loading knowledge...")
@@ -79,7 +74,6 @@ def initialize_retriever(kwargs):
     knowledge = []
     index = []
     retriever_mode = ["Selectable KnowledgeBase", "Mixture-of-KnowledgeBase"]
-    embed_mode = []
     for item in kwargs["retriever_config"]["retriever"]:
         retriever_name.append(item["name"])
         print("knowledge name:", item["name"])
@@ -90,6 +84,5 @@ def initialize_retriever(kwargs):
         index.append(index_load_local(item["index"], item["index_type"]))
         print("total number of indexes:", index[-1].ntotal)
     encoder = embedding_initialize(kwargs["retriever_config"]["encoder"])
-    for item in retriever_desc:
-        embed_mode.append(embedding_create(encoder, item))
+    embed_mode = [embedding_create(encoder, item) for item in retriever_desc]
     return retriever_name, knowledge, index, encoder, retriever_mode, embed_mode

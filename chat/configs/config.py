@@ -8,8 +8,7 @@ import json
 def read_config(path):
     with open(path, "r", encoding="utf-8") as reader:
         text = reader.read()
-    loaded = json.loads(text)
-    return loaded
+    return json.loads(text)
 
 # Write Config File Function
 def save_config(config, path):
